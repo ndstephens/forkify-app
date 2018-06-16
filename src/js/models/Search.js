@@ -12,7 +12,6 @@ export default class Search {
     try {
       const res = await axios(`${corsProxy}${url}`);
       this.result = res.data.recipes;
-      console.log(this.result);
     } catch (error) {
       console.log(error);
     }
