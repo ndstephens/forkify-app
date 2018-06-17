@@ -8,16 +8,13 @@ export default class Recipe {
   async getRecipe() {
     const url = `http://food2fork.com/api/get?key=${config.APIkey}&rId=${this.id}`;
 
-    try {
-      const res = await axios(`${config.corsProxy}${url}`);
-      this.title = res.data.recipe.title;
-      this.author = res.data.recipe.publisher;
-      this.img = res.data.recipe.image_url;
-      this.url = res.data.recipe.source_url;
-      this.ingredients = res.data.recipe.ingredients;
-    } catch (error) {
-      console.log(error);
-    }
+    const res = await axios(`${config.corsProxy}${url}`);
+
+    this.title = res.data.recipe.title;
+    this.author = res.data.recipe.publisher;
+    this.img = res.data.recipe.image_url;
+    this.url = res.data.recipe.source_url;
+    this.ingredients = res.data.recipe.ingredients;
   }
   calcTime() {
     // Assume about 5 minutes per ingredient
@@ -25,5 +22,95 @@ export default class Recipe {
   }
   calcServings() {
     this.servings = 4;
+  }
+
+  parseIngredients() {
+    const unitNormArr = [
+      ['tablespoon', 'tbsp'],
+      ['tablespoons', 'tbsp'],
+      ['tbsps', 'tbsp'],
+      ['teaspoon', 'tsp'],
+      ['teaspoons', 'tsp'],
+      ['tsps', 'tsp'],
+      ['ounce', 'oz'],
+      ['ounces', 'oz'],
+      ['ozs', 'oz'],
+      ['cups', 'cup'],
+      ['pound', 'lb'],
+      ['pounds', 'lb'],
+      ['lbs', 'lb'],
+    ];
+    const unitsNormalizedArr = unitNormArr.map((unit) => unit[1]);
+
+    const parsedIngredients = this.ingredients.map((item) => {
+      // Remove any dashes and put entire ingredient string to lowercase
+      let ingrStr = item.replace('-', ' ').toLowerCase();
+
+      // Remove parenthesis, and all text within them, from each ingredient
+      ingrStr = ingrStr.replace(/ *\([^)]*\)/g, '');
+
+      // Replace all verbose units with shorter normalized versions
+      unitNormArr.forEach((unit) => {
+        ingrStr = ingrStr.replace(unit[0], unit[1]);
+      });
+
+      // Split ingredient string into an array
+      const ingrArr = ingrStr.split(' ');
+      // Look for any normalized unit and get its index
+      const unitIndex = ingrArr.findIndex((unit2) => unitsNormalizedArr.includes(unit2));
+      // Create an object to hold each ingredient's quantity, unit, and description
+      let ingrObj = {};
+
+      // Parse ingredient into quantity, unit, and description
+      if (unitIndex > -1) {
+        // If there is a unit
+        ingrObj = {
+          // All indexes before the unit are the quantity
+          quantity: this.capDecimal(eval(ingrArr.slice(0, unitIndex).join('+'))),
+          unit: ingrArr[unitIndex],
+          description: ingrArr.slice(unitIndex + 1).join(' '),
+        };
+      } else if (this.evalInput(ingrArr[0])) {
+        // No unit, but first element is a number or fraction (quantity)
+        // First check if second element is also a number (or fraction) (ex. 3 1/2)
+        if (this.evalInput(ingrArr[1])) {
+          ingrObj = {
+            quantity: this.capDecimal(eval(`${ingrArr[0]}+${ingrArr[1]}`)),
+            unit: '',
+            description: ingrArr.slice(2).join(' '),
+          };
+        } else {
+          ingrObj = {
+            quantity: this.capDecimal(eval(`${ingrArr[0]}`)),
+            unit: '',
+            description: ingrArr.slice(1).join(' '),
+          };
+        }
+      } else {
+        // No unit and no initial number (quantity)
+        ingrObj = {
+          quantity: 1,
+          unit: '',
+          description: ingrStr,
+        };
+      }
+
+      return ingrObj;
+    });
+    this.ingredients = parsedIngredients;
+  }
+
+  evalInput(input) {
+    // Checks input (including fractions and equations) to see if it can evaluate to a number
+    try {
+      return typeof eval(input) === 'number';
+    } catch (error) {
+      return false;
+    }
+  }
+
+  capDecimal(num) {
+    // Cap decimals to 3 digits and round, but don't add zeros to shorter decimals
+    return +(Math.round(num + 'e+3') + 'e-3');
   }
 }
