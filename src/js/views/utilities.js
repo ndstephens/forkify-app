@@ -1,6 +1,6 @@
 import { elementStrings } from './elements';
 
-export const renderLoader = (parent) => {
+export const renderLoader = (parentEl) => {
   const loader = `
     <div class="${elementStrings.loader}">
       <svg>
@@ -8,12 +8,12 @@ export const renderLoader = (parent) => {
       </svg>
     </div>
   `;
-  parent.insertAdjacentHTML('afterbegin', loader);
+  parentEl.insertAdjacentHTML('afterbegin', loader);
 };
 
-export const clearLoader = () => {
-  const loader = document.querySelector(`.${elementStrings.loader}`);
+export const clearLoader = (parentEl) => {
+  const loader = parentEl.querySelector(`.${elementStrings.loader}`);
   if (loader) {
-    loader.parentElement.removeChild(loader);
+    parentEl.removeChild(loader);
   }
 };

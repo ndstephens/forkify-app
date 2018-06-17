@@ -11,7 +11,7 @@ import * as utilities from './views/utilities';
  */
 const state = {};
 
-const controlSearch = async () => {
+const ctrlSearch = async () => {
   // 1. Get query from the view
   const query = searchView.getInput();
 
@@ -25,12 +25,21 @@ const controlSearch = async () => {
     // 4. Search for recipes. 'getResults()' is an async method, which means it returns a promise
     await state.search.getResults();
     // 5. Render results on UI
-    utilities.clearLoader();
+    utilities.clearLoader(elements.searchRes);
     searchView.renderResults(state.search.result);
   }
 };
 
 elements.searchForm.addEventListener('submit', (e) => {
   e.preventDefault();
-  controlSearch();
+  ctrlSearch();
+});
+
+elements.searchResPages.addEventListener('click', (e) => {
+  const btn = e.target.closest('.btn-inline');
+  if (btn) {
+    const goToPage = parseInt(btn.dataset.goto, 10);
+    searchView.clearResults();
+    searchView.renderResults(state.search.result, goToPage);
+  }
 });
