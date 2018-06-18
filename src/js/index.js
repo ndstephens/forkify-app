@@ -95,8 +95,23 @@ const ctrlRecipe = async () => {
   }
 };
 
-window.addEventListener('hashchange', ctrlRecipe);
+// When the window loads or a recipe is clicked on, check the url hash for the recipe id and display it
 window.addEventListener('load', ctrlRecipe);
+window.addEventListener('hashchange', ctrlRecipe);
 // ['hashchange', 'load'].forEach((event) => {
 //   window.addEventListener(event, ctrlRecipe);
 // });
+
+// Increase or decrease 'servings' and ingredient quantities
+elements.recipe.addEventListener('click', (e) => {
+  // match the button or its children elements
+  if (e.target.matches('.btn-decrease, .btn-decrease *')) {
+    if (state.recipe.servings > 1) {
+      state.recipe.updateServings('dec');
+      recipeView.updateServingsIngredients(state.recipe);
+    }
+  } else if (e.target.matches('.btn-increase, .btn-increase *')) {
+    state.recipe.updateServings('inc');
+    recipeView.updateServingsIngredients(state.recipe);
+  }
+});

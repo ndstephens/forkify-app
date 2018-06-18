@@ -127,9 +127,23 @@ export default class Recipe {
   }
 
   capDecimal(num) {
-    // Cap decimals to 3 digits and round, but don't add zeros to shorter decimals
+    // Cap decimals to 5 digits and round, but don't add zeros to shorter decimals
+    //* This really no longer needed...everything is now converted to decimals
     if (typeof num === 'number') {
-      return +(Math.round(num + 'e+3') + 'e-3');
+      return +(Math.round(num + 'e+5') + 'e-5');
     }
+    // return num;
+  }
+
+  updateServings(type) {
+    // Servings
+    const newServings = type === 'dec' ? this.servings - 1 : this.servings + 1;
+
+    // Ingredients
+    this.ingredients.forEach((ingr) => {
+      ingr.quantity *= newServings / this.servings;
+    });
+
+    this.servings = newServings;
   }
 }
