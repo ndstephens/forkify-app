@@ -79,9 +79,11 @@ export default class Recipe {
       // Parse ingredient into quantity, unit, and description
       if (unitIndex > -1) {
         // If there is a unit
+        // Check if start of ingredient is a number
+        const quantityIndex = this.evalInput(ingrArr[0]) ? 0 : 1;
         ingrObj = {
           // All indexes before the unit are the quantity
-          quantity: this.capDecimal(eval(ingrArr.slice(0, unitIndex).join('+'))),
+          quantity: this.capDecimal(eval(ingrArr.slice(quantityIndex, unitIndex).join('+'))),
           unit: ingrArr[unitIndex],
           description: ingrArr.slice(unitIndex + 1).join(' '),
         };
@@ -126,6 +128,8 @@ export default class Recipe {
 
   capDecimal(num) {
     // Cap decimals to 3 digits and round, but don't add zeros to shorter decimals
-    return +(Math.round(num + 'e+3') + 'e-3');
+    if (typeof num === 'number') {
+      return +(Math.round(num + 'e+3') + 'e-3');
+    }
   }
 }

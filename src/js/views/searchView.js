@@ -11,6 +11,13 @@ export const clearResults = () => {
   elements.searchResPages.innerHTML = '';
 };
 
+export const highlightSelected = (id) => {
+  // First loop through all recipe search results and remove the 'active' class
+  Array.from(document.querySelectorAll('.results__link')).forEach((el) => el.classList.remove('results__link--active'));
+  // Then add the 'active' class the one most recently clicked
+  document.querySelector(`a[href="#${id}"]`).classList.add('results__link--active');
+};
+
 const limitRecipeTitle = (title, limit = 18) => {
   // if (title.length > limit) {
   //   const newTitle = [];

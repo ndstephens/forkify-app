@@ -19,13 +19,13 @@ const ctrlSearch = async () => {
   const query = searchView.getInput();
 
   if (query) {
-    // Create new search object and add to state
-    state.search = new Search(query);
-
     // Prepare UI for results
     searchView.clearInput();
     searchView.clearResults();
     utilities.renderLoader(elements.searchRes);
+
+    // Create new search object and add to state
+    state.search = new Search(query);
 
     try {
       // Search for recipes. 'getResults()' is an async method, which means it returns a promise
@@ -62,12 +62,17 @@ const ctrlRecipe = async () => {
   const id = window.location.hash.replace('#', '');
 
   if (id) {
-    // Create new recipe object and add to state
-    state.recipe = new Recipe(id);
-
     // Prepare UI for changes
     recipeView.clearRecipe();
     utilities.renderLoader(elements.recipe);
+
+    // Highlight selected search item in list
+    if (state.search) {
+      searchView.highlightSelected(id);
+    }
+
+    // Create new recipe object and add to state
+    state.recipe = new Recipe(id);
 
     try {
       // Get recipe data
@@ -90,8 +95,8 @@ const ctrlRecipe = async () => {
   }
 };
 
-// window.addEventListener('hashchange', ctrlRecipe);
-// window.addEventListener('load', ctrlRecipe);
-['hashchange', 'load'].forEach((event) => {
-  window.addEventListener(event, ctrlRecipe);
-});
+window.addEventListener('hashchange', ctrlRecipe);
+window.addEventListener('load', ctrlRecipe);
+// ['hashchange', 'load'].forEach((event) => {
+//   window.addEventListener(event, ctrlRecipe);
+// });
