@@ -1,6 +1,7 @@
 import Search from './models/Search';
 import Recipe from './models/Recipe';
 import * as searchView from './views/searchView';
+import * as recipeView from './views/recipeView';
 import { elements } from './views/elements';
 import * as utilities from './views/utilities';
 
@@ -18,8 +19,9 @@ const ctrlSearch = async () => {
   const query = searchView.getInput();
 
   if (query) {
-    // New search object and add to state
+    // Create new search object and add to state
     state.search = new Search(query);
+
     // Prepare UI for results
     searchView.clearInput();
     searchView.clearResults();
@@ -28,6 +30,7 @@ const ctrlSearch = async () => {
     try {
       // Search for recipes. 'getResults()' is an async method, which means it returns a promise
       await state.search.getResults();
+
       // Render results on UI
       utilities.clearLoader(elements.searchRes);
       searchView.renderResults(state.search.result);
@@ -59,20 +62,27 @@ const ctrlRecipe = async () => {
   const id = window.location.hash.replace('#', '');
 
   if (id) {
-    // Prepare UI for changes
-    // Create new recipe object
+    // Create new recipe object and add to state
     state.recipe = new Recipe(id);
+
+    // Prepare UI for changes
+    recipeView.clearRecipe();
+    utilities.renderLoader(elements.recipe);
 
     try {
       // Get recipe data
       await state.recipe.getRecipe();
+
       // Parse ingredients
       state.recipe.parseIngredients();
+
       // Calculate servings and time
       state.recipe.calcTime();
       state.recipe.calcServings();
+
       // Render recipe
-      console.log(state.recipe);
+      utilities.clearLoader(elements.recipe);
+      recipeView.renderRecipe(state.recipe);
     } catch (error) {
       alert('Error retrieving recipe');
       console.log(error);

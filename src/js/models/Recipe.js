@@ -25,22 +25,37 @@ export default class Recipe {
   }
 
   parseIngredients() {
+    // const unitNormArr = [
+    //   ['tablespoon', 'tbsp'],
+    //   ['tablespoons', 'tbsp'],
+    //   ['tbsps', 'tbsp'],
+    //   ['teaspoon', 'tsp'],
+    //   ['teaspoons', 'tsp'],
+    //   ['tsps', 'tsp'],
+    //   ['ounce', 'oz'],
+    //   ['ounces', 'oz'],
+    //   ['ozs', 'oz'],
+    //   ['cups', 'cup'],
+    //   ['pound', 'lb'],
+    //   ['pounds', 'lb'],
+    //   ['lbs', 'lb'],
+    //   ['kilogram', 'kg'],
+    //   ['kilograms', 'kg'],
+    //   ['kgs', 'kg'],
+    //   ['gram', 'g'],
+    //   ['grams', 'g'],
+    // ];
     const unitNormArr = [
-      ['tablespoon', 'tbsp'],
-      ['tablespoons', 'tbsp'],
-      ['tbsps', 'tbsp'],
+      ['tablespoon', 'Tbsp'],
       ['teaspoon', 'tsp'],
-      ['teaspoons', 'tsp'],
-      ['tsps', 'tsp'],
       ['ounce', 'oz'],
-      ['ounces', 'oz'],
-      ['ozs', 'oz'],
-      ['cups', 'cup'],
       ['pound', 'lb'],
-      ['pounds', 'lb'],
-      ['lbs', 'lb'],
+      ['kilogram', 'kg'],
+      ['gram', 'g'],
+      ['grams', 'g'],
     ];
-    const unitsNormalizedArr = unitNormArr.map((unit) => unit[1]);
+    const unitsArr = unitNormArr.map((unit) => unit[1]);
+    const unitsNormalizedArr = [...unitsArr, 'Tbsps', 'tsps', 'ozs', 'cups', 'cup', 'lbs', 'kgs'];
 
     const parsedIngredients = this.ingredients.map((item) => {
       // Remove any dashes and put entire ingredient string to lowercase
