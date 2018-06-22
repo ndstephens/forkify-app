@@ -1,9 +1,11 @@
 import Search from './models/Search';
 import Recipe from './models/Recipe';
 import List from './models/List';
-import * as searchView from './views/searchView';
-import * as recipeView from './views/recipeView';
+import Likes from './models/Likes';
+import * as likesView from './views/likesView';
 import * as listView from './views/listView';
+import * as recipeView from './views/recipeView';
+import * as searchView from './views/searchView';
 import { elements } from './views/elements';
 import * as utilities from './views/utilities';
 
@@ -11,7 +13,7 @@ import * as utilities from './views/utilities';
  * - Search object
  * - Current recipe object
  * - Shopping list object
- * - Liked recipes
+ * - Liked recipes list
  */
 const state = {};
 // TODO: FOR TESTING PURPOSES
@@ -49,17 +51,22 @@ const ctrlSearch = async () => {
   }
 };
 
+// Submit search query
 elements.searchForm.addEventListener('submit', (e) => {
   e.preventDefault();
   ctrlSearch();
 });
 
+// Click on pagination button
 elements.searchResPages.addEventListener('click', (e) => {
   const btn = e.target.closest('.btn-inline');
   if (btn) {
     const goToPage = parseInt(btn.dataset.goto, 10);
     searchView.clearResults();
     searchView.renderResults(state.search.result, goToPage);
+    // If currently displayed recipe is in listed search results then highlight it
+    const currentRecipeID = window.location.hash.replace('#', '');
+    searchView.highlightSelected(currentRecipeID);
   }
 });
 
@@ -97,7 +104,11 @@ const ctrlRecipe = async () => {
 
       // Render recipe
       utilities.clearLoader(elements.recipe);
-      recipeView.renderRecipe(state.recipe);
+      recipeView.renderRecipe(
+        // prettier ignore
+        state.recipe,
+        state.likes ? state.likes.isLiked(id) : undefined
+      );
     } catch (error) {
       alert('Error retrieving recipe');
       console.log(error);
@@ -105,12 +116,8 @@ const ctrlRecipe = async () => {
   }
 };
 
-// When the window loads or a recipe is clicked on, check the url hash for the recipe id and display it
-window.addEventListener('load', ctrlRecipe);
+// When a recipe is clicked on from the search list, display it based on changed url hash id
 window.addEventListener('hashchange', ctrlRecipe);
-// ['hashchange', 'load'].forEach((event) => {
-//   window.addEventListener(event, ctrlRecipe);
-// });
 
 //
 //? ---------------------------------------------------------------------------
@@ -148,19 +155,85 @@ elements.shoppingList.addEventListener('click', (e) => {
   }
 });
 
+//
+//? ---------------------------------------------------------------------------
+//? LIKES CONTROLLER
+//? ---------------------------------------------------------------------------
+const ctrlLike = () => {
+  if (!state.likes) {
+    state.likes = new Likes();
+  }
+  const currentID = state.recipe.id;
+
+  // User has NOT yet liked current recipe
+  if (!state.likes.isLiked(currentID)) {
+    // Add liked recipe to the state
+    const newLike = state.likes.addLike(
+      // prettier ignore
+      currentID,
+      state.recipe.title,
+      state.recipe.author,
+      state.recipe.img
+    );
+    // Toggle the like button
+    likesView.toggleLikeBtn(true);
+    // Add liked recipe to the UI list
+    likesView.renderLike(newLike);
+
+    // User HAS already liked current recipe
+  } else {
+    // Remove liked recipe from the state
+    state.likes.deleteLike(currentID);
+    // Toggle the like button
+    likesView.toggleLikeBtn(false);
+    // Remove liked recipe from the UI list
+    likesView.deleteLikeUI(currentID);
+  }
+
+  likesView.toggleLikeMenu(state.likes.getNumLikes());
+};
+
+//
+//* When the window loads:
+// Retrieve and display saved likes from localStorage if available and
+// Check the url hash for a recipe id and display it
+window.addEventListener('load', () => {
+  state.likes = new Likes();
+  // Restore like from localStorage if available
+  state.likes.readStorage();
+  // Render existing likes
+  state.likes.likes.forEach((like) => likesView.renderLike(like));
+  // Display likes heart icon if there are saved likes
+  likesView.toggleLikeMenu(state.likes ? state.likes.getNumLikes() : undefined);
+
+  // Load recipe from ID in url hash if present
+  ctrlRecipe();
+});
+
+//
+//* EVENT DELEGATION ON THE RECIPE VIEW
 // Increase or decrease 'servings' and ingredient quantities
-// Also, add ingredients to the Shopping List
+// Add ingredients to the Shopping List
+// Add recipe to the Likes list
 elements.recipe.addEventListener('click', (e) => {
   //* match the button or its children elements
   if (e.target.matches('.btn-decrease, .btn-decrease *')) {
+    // Decrease servings
     if (state.recipe.servings > 1) {
       state.recipe.updateServings('dec');
       recipeView.updateServingsIngredients(state.recipe);
     }
   } else if (e.target.matches('.btn-increase, .btn-increase *')) {
+    // Increase servings
     state.recipe.updateServings('inc');
     recipeView.updateServingsIngredients(state.recipe);
+
+    // Add ingredients to shopping list
   } else if (e.target.matches('.recipe__btn-add, .recipe__btn-add *')) {
     ctrlList();
+
+    // Add recipe to Likes list
+  } else if (e.target.matches('.recipe__love, .recipe__love *')) {
+    ctrlLike();
   }
 });

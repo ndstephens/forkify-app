@@ -13,9 +13,15 @@ export const clearResults = () => {
 
 export const highlightSelected = (id) => {
   // First loop through all recipe search results and remove the 'active' class
-  Array.from(document.querySelectorAll('.results__link')).forEach((el) => el.classList.remove('results__link--active'));
-  // Then add the 'active' class the one most recently clicked
-  document.querySelector(`a[href="#${id}"]`).classList.add('results__link--active');
+  Array.from(elements.searchResList.querySelectorAll('.results__link')).forEach((el) =>
+    el.classList.remove('results__link--active')
+  );
+  // Then add the 'active' class to the one most recently selected (may be selected from 'liked' list)
+  // First check that the element is still even on the page (due to pagination)
+  const el = elements.searchResList.querySelector(`.results__link[href*="${id}"]`);
+  if (el) {
+    el.classList.add('results__link--active');
+  }
 };
 
 const limitRecipeTitle = (title, limit = 18) => {
@@ -31,7 +37,7 @@ const limitRecipeTitle = (title, limit = 18) => {
   // } else {
   //   return title;
   // }
-
+  // OR....
   // if (title.length > limit) {
   //   return title.substring(0, title.substring(0, limit).lastIndexOf(' ')).concat(' ...');
   // } else {

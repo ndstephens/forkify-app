@@ -50,6 +50,10 @@ body {
   }
 }
 
+svg {
+  pointer-events: none;
+}
+
 .btn,
 .btn-small,
 .btn-small:link,
@@ -252,7 +256,7 @@ body {
   display: flex;
   align-items: center;
   height: 100%;
-  transition: all 0.3s;
+  transition: background-color 0.3s;
 }
 .likes__field:hover {
   background-color: #f2efee;
