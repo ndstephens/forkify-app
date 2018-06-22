@@ -16,8 +16,6 @@ import * as utilities from './views/utilities';
  * - Liked recipes list
  */
 const state = {};
-// TODO: FOR TESTING PURPOSES
-window.state = state;
 
 //
 //? ---------------------------------------------------------------------------
