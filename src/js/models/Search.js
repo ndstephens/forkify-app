@@ -6,9 +6,11 @@ export default class Search {
     this.query = query;
   }
   async getResults() {
-    const url = `http://food2fork.com/api/search?key=${config.APIkey}&q=${this.query}`;
+    const url = `http://food2fork.com/api/search?key=${config.APIkey}&q=${
+      this.query
+    }`;
 
-    const res = await axios(`${config.corsProxy}${url}`);
+    const res = await axios(`${config.corsAnywhereProxy}${url}`);
     this.result = res.data.recipes;
   }
 }
