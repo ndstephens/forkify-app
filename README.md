@@ -9,7 +9,7 @@ No framework, just vanilla JS using an MVC pattern.
 Unfortunately requires use of a CORS proxy to connect with the recipe API. It
 will sometimes act funky and send an error. Try again later...🤷🏻‍
 
-View working demo [here](https://nds-forkify.netlify.com)
+### View working demo [here](https://nds-forkify.netlify.com)
 
 <br>
 
